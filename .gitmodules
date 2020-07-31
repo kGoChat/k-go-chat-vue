@@ -1,0 +1,3 @@
+[submodule "src/assets/JsTools"]
+	path = JsTools
+	url = https://github.com/kekxv/JsTools.git

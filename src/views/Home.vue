@@ -1,50 +1,72 @@
 <template>
   <div class="home">
 
-    <el-card class="box-card" style="width: 600px;margin: 0.5em;">
-      <div slot="header" class="clearfix">
-        <span>账户登录</span>
-      </div>
-      <div class="item">
-        <el-row>
-          <el-col :span="20">
-            <el-input v-model="user">
-              <template slot="prepend">登录用户</template>
-            </el-input>
-          </el-col>
-          <el-col :span="4">
-            <el-button @click="Login()">登录</el-button>
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row>
-          <el-col :span="8">
-            <el-input v-model="toUser" style="width:90%;float: left;">
-              <template slot="prepend">用户</template>
-            </el-input>
-          </el-col>
-          <el-col :span="12">
-            <el-input v-model="message"/>
-          </el-col>
-          <el-col :span="4">
-            <el-button @click="sendChat()">发送</el-button>
-          </el-col>
-        </el-row>
-      </div>
-      <div class="item">
-        <el-row>
-          <el-col :span="4">
-            消息
-          </el-col>
-          <el-col :span="20">
-            <el-input v-model="other_message" type="textarea" readonly="readonly" rows="5" show-word-limit/>
-          </el-col>
-        </el-row>
-      </div>
-    </el-card>
+    <div style="padding: 0.5em;">
+      <el-card class="box-card" style="width: 600px;max-width: 100%;">
+        <div slot="header" class="clearfix">
+          <span>账户登录</span>
+        </div>
+        <div class="item">
+          <el-row>
+            <el-col :span="20">
+              <el-input v-model="user">
+                <template slot="prepend">登录用户</template>
+              </el-input>
+            </el-col>
+            <el-col :span="4">
+              <el-button @click="Login()">登录</el-button>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="item">
+          <el-row>
+            <el-col :span="24">
+              <el-input v-model="toUser">
+                <template slot="prepend">用户</template>
+              </el-input>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="item">
+          <el-row>
+            <el-col :span="20">
+              <el-input v-model="message">
+                <template slot="prepend">消息</template>
+              </el-input>
+            </el-col>
+            <el-col :span="4">
+              <el-button @click="sendChat()">发送</el-button>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="item">
+          <el-row>
+            <el-col :span="4">
+              消息
+            </el-col>
+            <el-col :span="20">
+              <el-input v-model="other_message" type="textarea" readonly="readonly" rows="5" show-word-limit/>
+            </el-col>
+          </el-row>
+        </div>
 
-    <el-card class="box-card" style="width: 600px;margin: 0.5em;">
+        <div class="item">
+          <el-row>
+            <el-col :span="22">
+              <el-button @click="InitWebRTC()">建立 WebRTC 通道</el-button>
+            </el-col>
+            <el-col :span="2">
+              <el-switch aria-readonly="true" readonly="readonly" disabled="disabled"
+                         v-model="webRtcState"
+                         active-color="#13ce66"
+                         inactive-color="#ff4949">
+              </el-switch>
+            </el-col>
+          </el-row>
+        </div>
+      </el-card>
+    </div>
+    <el-card v-if="false" class="box-card" style="width: 600px;margin: 0.5em;">
       <div slot="header" class="clearfix">
         <span>WebRTC 交互</span>
       </div>
@@ -121,6 +143,7 @@ export default {
       toUser: "caesar",
       message: "",
       other_message: "",
+      webRtcState: false,
       websocketApi: null,
       offer: "{}",
       answer: "{}",
@@ -141,19 +164,34 @@ export default {
           let data = await jsFileRead.readBlob();
           // sWebRTC.send(data);
         }
-        console.log("read end");
+        console.trace("read end");
       }
     },
 
+    InitWebRTC() {
+      let self = this;
+      this.websocketApi.InitWebRTC(true, this.toUser).then((data) => {
+        // console.log("InitWebRTC", data);
+      }).catch((data) => {
+        self.$message.error(data.message);
+      });
+    },
+
     Login() {
+      let self = this;
       this.websocketApi.sendUser({
         code: 0,
         type: "Login",
         data: {"user": this.user},
         remarks: "",
-      })
+      }).then((data) => {
+        self.$message.success(data.message);
+      }).catch((data) => {
+        self.$message.error(data.message);
+      });
     },
     sendChat() {
+      let self = this;
       this.websocketApi.sendChat({
         code: 0,
         type: "Chat",
@@ -162,75 +200,56 @@ export default {
           message: this.message,
         },
         remarks: "",
-      })
-    },
-    async Init(master) {
-      webRTC = webRTC || new WebRTC({
-        DataChannelLabel: "kGoChat",
-        master: master || false,
-        onmessage: console.info,
-        onicecandidate: (ev) => {
-          // rWebRTC && rWebRTC.addIceCandidate(ev.candidate);
-          this.candidate = JSON.stringify(ev.candidate);
-        }
+      }).then((data) => {
+        self.$message.success(data.message);
+      }).catch((data) => {
+        self.$message.error(data.message);
       });
     },
-    async Free() {
-      webRTC = null;
-      this.offer = "{}";
-      this.answer = "{}";
-      this.candidate = "{}";
-      this.other_candidate = "{}";
-    },
-    async update_candidate() {
-      await webRTC.addIceCandidate(this.other_candidate);
-    },
-    async createOffer() {
-      this.offer = JSON.stringify(await webRTC.createOffer());
-      console.log(this.offer);
-    },
-    async handleOffer(offer) {
-      this.answer = JSON.stringify(await webRTC.handleOffer(offer || this.offer));
-      console.log(offer, this.answer);
-    },
-    async handleAnswer(answer) {
-      await webRTC.handleAnswer(answer || this.answer);
-      console.log(answer || this.answer);
+    InitWebsocket() {
+      let self = this;
+      this.websocketApi = new websocketApi({
+        OnConnect() {
+          self.$message.success("连接成功");
+        },
+        OnDisconnect() {
+          self.$message.warning("连接断开");
+          setTimeout(() => {
+            self.InitWebsocket();
+          }, 3000);
+        },
+
+        OnChat(data) {
+          if (data.code === 0) {
+            if (data.type === "ChatBack") {
+              self.$message.success(data.message);
+            } else
+              self.other_message = `${data.data.user}:${data.data.message}`
+          } else {
+            self.$message.error(data.message);
+          }
+        },
+        OnUser: console.trace,
+        OnWebRTC: console.trace,
+        onwebrtcmessage: console.trace,
+        // onwebrtcerror: console.trace,
+        onWebRtcConnected(n, o) {
+          self.webRtcState = n;
+          if (n) {
+            self.toUser = this.webRtcUser;
+            self.$message.success("WebRtc 连接成功");
+          } else {
+            self.$message.error("WebRtc 断开连接");
+          }
+        }
+      });
     }
   },
   async mounted() {
-    let self = this;
-    this.websocketApi = new websocketApi({
-      OnConnect() {
-        self.$message.success("连接成功");
-      },
-      OnDisconnect() {
-        self.$message.warning("连接断开");
-      },
-
-      OnChat(data) {
-        if (data.code === 0) {
-          if (data.type === "ChatBack") {
-            self.$message.success(data.message);
-          } else
-            self.other_message = `${data.data.user}:${data.data.message}`
-        } else {
-          self.$message.error(data.message);
-        }
-      },
-      OnUser(data) {
-        if (data.code === 0) {
-          switch (data.type) {
-            case "Login": {
-              self.$message.success(data.message);
-            }
-          }
-        } else {
-          self.$message.error(data.message);
-        }
-      },
-      OnWebRTC: console.log,
-    });
+    this.InitWebsocket();
+  },
+  beforeDestroy() {
+    this.websocketApi.Disconnect();
   }
 }
 </script>
@@ -242,5 +261,12 @@ export default {
 
 .item {
   text-align: center;
+}
+
+/deep/ .item .el-row .el-col:first-child {
+  text-align: left;
+}
+/deep/ .item .el-row .el-col:last-child {
+  text-align: right;
 }
 </style>
