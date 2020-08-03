@@ -238,7 +238,7 @@ let websocketApi = function (option) {
             let onWebRtcConnected = option.onWebRtcConnected || option.onwebrtcConnected || option.onwebrtcconnected || console.log;
             let o = webRtcConnected;
             webRtcConnected = v;
-            if (v !== o) onWebRtcConnected && onWebRtcConnected.call(self,v, o);
+            if (v !== o) onWebRtcConnected && onWebRtcConnected.call(self, v, o);
         }
     })
 }
@@ -287,11 +287,11 @@ websocketApi.prototype = {
             onerror(event) {
                 // console.log("onerror", event)
                 let onwebrtcerror = self.$option.onWebRtcError || self.$option.onWebRtcerror || self.$option.onwebrtcerror;
-                onwebrtcerror && onwebrtcerror.call(self,event);
+                onwebrtcerror && onwebrtcerror.call(self, event);
             },
-            onmessage(data){
+            onmessage(data) {
                 let onWebRTCmessage = self.$option.onWebRTCmessage || self.$option.onWebRtcMessage || self.$option.onwebrtcmessage
-                onWebRTCmessage && onWebRTCmessage.call(self,data);
+                onWebRTCmessage && onWebRTCmessage.call(self, data);
             },
             onicecandidate: (ev) => {
                 // rWebRTC && rWebRTC.addIceCandidate(ev.candidate);

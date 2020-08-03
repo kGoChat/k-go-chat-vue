@@ -1,11 +1,15 @@
 // Vue.config.js 配置选项
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// 在vue-config.js 中加入
+const CompressionWebpackPlugin = require('compression-webpack-plugin');
+const productionGzipExtensions = ['js', 'css'];
+const isProduction =  true;//process.env.NODE_ENV === 'production';
 
-let host = "http://127.0.0.1:8000/";
+let host = "http://127.0.0.1:8080/";
 module.exports = {
     // 选项
-    //  基本路径
+    // 基本路径
     publicPath: "./",
     //  构建时的输出目录
     outputDir: "../public",
@@ -32,6 +36,14 @@ module.exports = {
         // js output config
         config.output.filename = "[name].js?v=[hash]";
         config.output.chunkFilename = "[name].js?v=[hash]";
+        if (isProduction) {
+            config.plugins.push(new CompressionWebpackPlugin({
+                algorithm: 'gzip',
+                test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'),
+                threshold: 10240,
+                minRatio: 0.8
+            }))
+        }
 
     },
     chainWebpack: config => {
@@ -63,6 +75,7 @@ module.exports = {
     },
     // 配置 webpack-dev-server 行为。
     devServer: {
+        disableHostCheck: true,
         open: false,//process.platform === 'darwin',
         host: '0.0.0.0',
         port: 8080,
@@ -103,5 +116,5 @@ module.exports = {
     // 三方插件的选项
     pluginOptions: {
         // ...
-    }
+    },
 }
