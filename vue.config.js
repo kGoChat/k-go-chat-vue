@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // 在vue-config.js 中加入
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const productionGzipExtensions = ['js', 'css'];
-const isProduction =  process.env.NODE_ENV === 'production';
+const isProduction =  false;//process.env.NODE_ENV === 'production';
 
 let host = "http://127.0.0.1:8000/";
 module.exports = {
