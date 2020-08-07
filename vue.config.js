@@ -4,9 +4,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // 在vue-config.js 中加入
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const productionGzipExtensions = ['js', 'css'];
-const isProduction =  true;//process.env.NODE_ENV === 'production';
+const isProduction =  process.env.NODE_ENV === 'production';
 
-let host = "http://127.0.0.1:8080/";
+let host = "http://127.0.0.1:8000/";
 module.exports = {
     // 选项
     // 基本路径
@@ -26,7 +26,7 @@ module.exports = {
     //  babel-loader 默认会跳过 node_modules 依赖。
     transpileDependencies: [ /* string or regex */],
     //  是否为生产环境构建生成 source map？
-    productionSourceMap: true,
+    productionSourceMap: isProduction,
     //  设置生成的 HTML 中 <link rel="stylesheet"> 和 <script> 标签的 crossorigin 属性。
     // crossorigin: "",
     //  在生成的 HTML 中的 <link rel="stylesheet"> 和 <script> 标签上启用 Subresource Integrity (SRI)。
@@ -105,7 +105,7 @@ module.exports = {
         // 也可以是一个传递给 `extract-text-webpack-plugin` 的选项对象
         extract: false,
         // 是否开启 CSS source map？
-        sourceMap: true,
+        sourceMap: isProduction,
     },
     // 在生产环境下为 Babel 和 TypeScript 使用 `thread-loader`
     // 在多核机器下会默认开启。
